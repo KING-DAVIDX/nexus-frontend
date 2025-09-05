@@ -179,7 +179,7 @@
     </div>
     
     <div class="flex justify-center space-x-6 mb-6">
-      {/* Local audio visualizer would go here */}
+      
       <div class="w-24 h-24 bg-indigo-600 rounded-full flex items-center justify-center">
         <span class="text-white text-2xl">
           {callData.isInitiator ? callData.to?.substring(0, 2) : callData.from?.substring(0, 2)}

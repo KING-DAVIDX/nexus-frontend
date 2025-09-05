@@ -1,5 +1,5 @@
 <script>
-  import { onMount, onDestroy } from 'svelte'
+  import { onMount, createEventDispatcher } from 'svelte'
   import { user } from '../../stores/auth.js'
   import { supabase } from '../../lib/supabaseClient.js'
   import { getSocket } from '../../lib/socket.js'
@@ -20,16 +20,9 @@
     loadMessages()
     
     if (socket) {
-      // Listen for new private messages
       socket.on('private-message', handleIncomingMessage)
-      
-      // Listen for new group messages
       socket.on('group-message', handleIncomingMessage)
-      
-      // Listen for message reactions
       socket.on('message-reaction', handleMessageReaction)
-      
-      // Listen for message sent confirmation
       socket.on('message-sent', handleMessageSent)
     }
     
@@ -45,7 +38,6 @@
   
   async function loadMessages() {
     loading = true
-    
     try {
       let query = supabase
         .from('messages')
@@ -63,10 +55,7 @@
       }
       
       const { data, error } = await query
-      
-      if (!error) {
-        messages = data
-      }
+      if (!error) messages = data
     } catch (error) {
       console.error('Error loading messages:', error)
     } finally {
@@ -75,7 +64,6 @@
   }
   
   function handleIncomingMessage(message) {
-    // Check if this message belongs to the current chat
     const isPrivateMatch = chatType === 'private' && 
       ((message.sender_id === activeChat.id && message.receiver_id === $user.id) ||
        (message.sender_id === $user.id && message.receiver_id === activeChat.id))
@@ -88,7 +76,6 @@
   }
   
   function handleMessageSent(data) {
-    // Replace temporary message with actual message from server
     messages = messages.map(msg => 
       msg.tempId === data.tempId ? data.message : msg
     )
@@ -100,7 +87,8 @@
     )
   }
   
-  async function sendMessage() {
+  async function sendMessage(e) {
+    e.preventDefault()
     if (!newMessage.trim()) return
     
     const tempId = Date.now().toString()
@@ -110,7 +98,6 @@
       timestamp: new Date().toISOString()
     }
     
-    // Add temporary message to UI immediately
     messages = [...messages, {
       id: tempId,
       tempId,
@@ -125,7 +112,6 @@
       isTemp: true
     }]
     
-    // Send via socket
     if (chatType === 'private') {
       socket.emit('private-message', {
         ...messageData,
@@ -146,7 +132,6 @@
       messageId,
       reaction
     })
-    
     showReactionPicker = false
     reactionMessageId = null
   }
@@ -160,16 +145,18 @@
     }
   }
   
-  const chatContainer = document.querySelector('.chat-messages')
-  
-  $: if (chatContainer && messages.length) {
-    setTimeout(() => {
-      chatContainer.scrollTop = chatContainer.scrollHeight
-    }, 100)
+  $: {
+    const chatContainer = document.querySelector('.chat-messages')
+    if (chatContainer && messages.length) {
+      setTimeout(() => {
+        chatContainer.scrollTop = chatContainer.scrollHeight
+      }, 100)
+    }
   }
 </script>
 
 <div class="flex-1 flex flex-col h-full">
+  <!-- header -->
   <div class="p-4 border-b border-gray-200 flex items-center justify-between">
     <div class="flex items-center space-x-3">
       {#if chatType === 'private'}
@@ -201,7 +188,6 @@
         </div>
       {/if}
     </div>
-    
     {#if chatType === 'private'}
       <button 
         class="p-2 rounded-full hover:bg-gray-100"
@@ -215,6 +201,7 @@
     {/if}
   </div>
   
+  <!-- messages -->
   <div class="flex-1 overflow-y-auto p-4 space-y-4 chat-messages">
     {#if loading}
       <div class="text-center text-gray-500">Loading messages...</div>
@@ -227,14 +214,11 @@
             {#if chatType === 'group' && message.sender_id !== $user.id}
               <div class="text-xs font-medium mb-1">{message.sender.nickname}</div>
             {/if}
-            
             <div class="flex items-end space-x-2">
               <p class="break-words">{message.content}</p>
-              
               {#if message.reaction}
                 <span class="text-sm">{message.reaction}</span>
               {/if}
-              
               {#if !message.isTemp}
                 <button 
                   class="opacity-0 group-hover:opacity-100 transition-opacity text-xs"
@@ -246,7 +230,6 @@
                 </button>
               {/if}
             </div>
-            
             <div class="text-xs mt-1 {message.sender_id === $user.id ? 'text-indigo-200' : 'text-gray-500'}">
               {new Date(message.timestamp).toLocaleTimeString()}
             </div>
@@ -256,8 +239,9 @@
     {/if}
   </div>
   
+  <!-- input -->
   <div class="p-4 border-t border-gray-200">
-    <form class="flex space-x-2" on:submit|prevent={sendMessage}>
+    <form class="flex space-x-2" on:submit={sendMessage}>
       <input
         type="text"
         placeholder="Type a message..."

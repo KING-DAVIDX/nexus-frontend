@@ -2,7 +2,7 @@
   import { supabase } from '../../lib/supabaseClient.js'
   import EmailVerification from './EmailVerification.svelte'
   
-  let authView = 'login' // 'login', 'register', 'verify'
+  let authView = 'login'
   let email = ''
   let password = ''
   let nickname = ''
@@ -10,9 +10,8 @@
   let loading = false
   let verificationEmail = ''
   
-  // Check if nickname is available
   async function checkNicknameAvailability(nick) {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('users')
       .select('id')
       .eq('nickname', nick)
@@ -26,7 +25,7 @@
     error = ''
     
     try {
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
+      const { error: authError } = await supabase.auth.signInWithPassword({
         email,
         password
       })
@@ -44,14 +43,12 @@
     error = ''
     
     try {
-      // Check if nickname is available
       const isAvailable = await checkNicknameAvailability(nickname)
       if (!isAvailable) {
         error = 'Nickname is already taken'
         return
       }
       
-      // Send verification code
       const response = await fetch('/api/send-verification-code', {
         method: 'POST',
         headers: {
@@ -81,7 +78,6 @@
   }
   
   function handleVerificationComplete() {
-    // After verification, complete registration
     completeRegistration()
   }
   
@@ -89,7 +85,6 @@
     loading = true
     
     try {
-      // Create user account
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: verificationEmail,
         password,
@@ -102,7 +97,6 @@
       
       if (authError) throw authError
       
-      // Add user to users table
       const { error: dbError } = await supabase
         .from('users')
         .insert({
@@ -114,13 +108,20 @@
       
       if (dbError) throw dbError
       
-      // Switch to login view
       authView = 'login'
       error = 'Registration successful! Please login.'
     } catch (err) {
       error = err.message
     } finally {
       loading = false
+    }
+  }
+
+  function handleSubmit() {
+    if (authView === 'login') {
+      handleLogin()
+    } else {
+      handleRegister()
     }
   }
 </script>
@@ -147,7 +148,7 @@
         onCancel={() => switchView('register')}
       />
     {:else}
-      <form class="mt-8 space-y-6" on:submit|prevent={authView === 'login' ? handleLogin : handleRegister}>
+      <form class="mt-8 space-y-6" on:submit|preventDefault={handleSubmit}>
         {#if authView === 'register'}
           <div>
             <label for="nickname" class="block text-sm font-medium text-gray-700">Nickname</label>

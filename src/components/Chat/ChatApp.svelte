@@ -1,5 +1,5 @@
 <script>
-  import { onMount, onDestroy } from 'svelte'
+  import { onMount } from 'svelte'
   import { user } from '../../stores/auth.js'
   import { getSocket } from '../../lib/socket.js'
   import Sidebar from '../Sidebar/Sidebar.svelte'
@@ -7,7 +7,7 @@
   import VoiceCall from './VoiceCall.svelte'
   
   let activeChat = null
-  let chatType = null // 'private' or 'group'
+  let chatType = null
   let incomingCall = null
   let ongoingCall = null
   
@@ -16,17 +16,12 @@
   onMount(() => {
     if (socket) {
       socket.emit('authenticate', $user.id)
-      
-      // Listen for incoming calls
       socket.on('incoming-call', (data) => {
         incomingCall = data
       })
     }
-    
     return () => {
-      if (socket) {
-        socket.off('incoming-call')
-      }
+      if (socket) socket.off('incoming-call')
     }
   })
   
@@ -45,10 +40,7 @@
   }
   
   function answerCall() {
-    ongoingCall = {
-      ...incomingCall,
-      isInitiator: false
-    }
+    ongoingCall = { ...incomingCall, isInitiator: false }
     incomingCall = null
   }
   
@@ -82,7 +74,7 @@
     {/if}
   </main>
   
-  {/* Incoming call notification */}
+  <!-- Incoming call notification -->
   {#if incomingCall}
     <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg p-6 text-center">
@@ -106,7 +98,7 @@
     </div>
   {/if}
   
-  {/* Ongoing call */}
+  <!-- Ongoing call -->
   {#if ongoingCall}
     <VoiceCall 
       callData={ongoingCall} 

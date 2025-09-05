@@ -13,7 +13,7 @@
     error = ''
     
     try {
-      const response = await fetch('/api/verify-code', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/verify-code`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

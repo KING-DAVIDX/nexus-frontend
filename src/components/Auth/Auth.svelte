@@ -49,7 +49,7 @@
         return
       }
       
-      const response = await fetch('/api/send-verification-code', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/send-verification-code`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

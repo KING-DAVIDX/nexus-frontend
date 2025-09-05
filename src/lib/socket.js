@@ -1,26 +1,23 @@
 import { io } from 'socket.io-client'
 
-// Use environment variable for backend URL with fallback
 const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'
 
 let socket = null
 
 export const initSocket = (userId) => {
   socket = io(backendUrl, {
-    auth: {
-      userId
-    }
+    auth: { userId }
   })
-  
-  // Socket event handlers
+
   socket.on('connect', () => {
-    console.log('Connected to server');
-  });
-  
+    console.log('Connected to server')
+    socket.emit('authenticate', userId)
+  })
+
   socket.on('disconnect', () => {
-    console.log('Disconnected from server');
-  });
-  
+    console.log('Disconnected from server')
+  })
+
   return socket
 }
 

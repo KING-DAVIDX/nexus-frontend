@@ -169,7 +169,7 @@
 </script>
 
 <div class="w-80 bg-gray-50 border-r border-gray-200 flex flex-col h-full">
-  {/* Header */}
+  
   <div class="p-4 border-b border-gray-200 flex items-center justify-between">
     <h1 class="text-xl font-bold text-indigo-600">Nexus Chat</h1>
     <div class="flex items-center space-x-2">
@@ -185,7 +185,7 @@
     </div>
   </div>
   
-  {/* Search */}
+  
   <div class="p-4 border-b border-gray-200">
     <div class="relative">
       <input
@@ -202,7 +202,7 @@
     </div>
   </div>
   
-  {/* New chat buttons */}
+  
   <div class="p-4 border-b border-gray-200 flex space-x-2">
     <button 
       class="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors"
@@ -218,7 +218,7 @@
     </button>
   </div>
   
-  {/* Chat list */}
+  
   <div class="flex-1 overflow-y-auto">
     {#each filteredChats as chat}
       <div 
@@ -267,7 +267,7 @@
     {/each}
   </div>
   
-  {/* New Chat Modal */}
+  
   {#if showNewChatModal}
     <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg p-6 w-96">
@@ -297,7 +297,7 @@
     </div>
   {/if}
   
-  {/* New Group Modal */}
+  
   {#if showNewGroupModal}
     <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg p-6 w-96 max-h-96 overflow-y-auto">

@@ -7,25 +7,24 @@
   let code = ''
   let error = ''
   let loading = false
+
+  $: canVerify = code.length === 6 && !loading
   
   async function verifyCode() {
+    if (!canVerify) return
     loading = true
     error = ''
     
     try {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/verify-code`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, code })
       })
       
       const result = await response.json()
       
-      if (!response.ok) {
-        throw new Error(result.error || 'Verification failed')
-      }
+      if (!response.ok) throw new Error(result.error || 'Verification failed')
       
       dispatch('complete')
     } catch (err) {
@@ -78,7 +77,7 @@
       type="button"
       class="flex-1 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
       on:click={verifyCode}
-      disabled={loading || code.length !== 6}
+      disabled={!canVerify}
     >
       {loading ? 'Verifying...' : 'Verify'}
     </button>

@@ -26,7 +26,7 @@
       
       if (!response.ok) throw new Error(result.error || 'Verification failed')
       
-      dispatch('complete')
+      dispatch('complete', { email })
     } catch (err) {
       error = err.message
     } finally {
